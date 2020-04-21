@@ -1,30 +1,59 @@
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import axios from "axios";
+import Movie from "./Movie";
+import "./App.css";
 
+//yts-proxy.now.sh/list_movie.json
 class App extends React.Component {
-  //Component가 갖고 있는 state를 쓰기 위해 클래스 컴포넌트를 사용. 
-  //state 왜 사용해 ?  데이터는 변하니까!
-  //state는 객체야 
+  // 순서 : state --> render --> componentDidMount() --> getMovies()
   state = {
-    count: 0
-  }
+    isLoading: true,
+    movies: [],
+  };
 
-  add = () => {
-     console.log('add')
-  }
+  getMovies = async () => {
+    //axios가 데이터를 가져오기까지 시간이 좀 걸릴지 모르니까 기다리라는 의미로 await을 붙여준다.
+    //await은 async 함수에서만 사용 가능하기 때문에 async 함수를 선언 해준다.
+    // movies.data.data.movies 로 받아오지 말고 ES6 문법을 사용해서 다음과 같이 데이터를 뽑아 올 수 있다.
+    const {
+      data: {
+        data: { movies },
+      },
+    } = await axios.get(
+      "https://yts-proxy.now.sh/list_movies.json?sort_by=rating"
+    );
+    this.setState({ movies, isLoading: false });
+  };
 
-  minus = () => {
-    console.log('minus');
+  componentDidMount() {
+    this.getMovies();
   }
 
   render() {
+    const { isLoading, movies } = this.state;
     return (
-    <div>
-      <h1> The number is {this.state.count}</h1>
-      <button onClick={this.add}>Add</button>
-      <button onClick={this.minus}>Minus</button>
-    </div>
-    )
+      <section className="container">
+        {isLoading ? (
+          <div className="loader">
+            <span className="loader__text">Loading... </span>
+          </div>
+        ) : (
+          <div className="movies">
+            {movies.map((movie) => (
+              <Movie
+                key={movie.id}
+                id={movie.id}
+                year={movie.year}
+                title={movie.title}
+                summary={movie.summary}
+                poster={movie.medium_cover_image}
+                genres={movie.genres}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    );
   }
 }
 
