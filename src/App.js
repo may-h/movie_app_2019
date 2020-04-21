@@ -1,60 +1,24 @@
 import React from "react";
-import axios from "axios";
-import Movie from "./Movie";
-import "./App.css";
+import { HashRouter, Route } from "react-router-dom";
+import Home from "./routes/Home";
+import About from "./routes/About";
+import Detail from "./routes/Detail";
+import Navigation from "./compnonent/Navigation";
 
-//yts-proxy.now.sh/list_movie.json
-class App extends React.Component {
-  // 순서 : state --> render --> componentDidMount() --> getMovies()
-  state = {
-    isLoading: true,
-    movies: [],
-  };
+//HashRouter, BrowerRouter가 있는데, 해시를 사용하는 이유는 gh-pages에서 설정하기 편하기 때문에.(브라우저라우터는 설정하기 복잡)
+//HashRouter를 쓰면 url에 /#/about이 보인다. 일반 /about 형식으로 보여지려면 브라우저라우터를 쓰면 된다.
 
-  getMovies = async () => {
-    //axios가 데이터를 가져오기까지 시간이 좀 걸릴지 모르니까 기다리라는 의미로 await을 붙여준다.
-    //await은 async 함수에서만 사용 가능하기 때문에 async 함수를 선언 해준다.
-    // movies.data.data.movies 로 받아오지 말고 ES6 문법을 사용해서 다음과 같이 데이터를 뽑아 올 수 있다.
-    const {
-      data: {
-        data: { movies },
-      },
-    } = await axios.get(
-      "https://yts-proxy.now.sh/list_movies.json?sort_by=rating"
-    );
-    this.setState({ movies, isLoading: false });
-  };
-
-  componentDidMount() {
-    this.getMovies();
-  }
-
-  render() {
-    const { isLoading, movies } = this.state;
-    return (
-      <section className="container">
-        {isLoading ? (
-          <div className="loader">
-            <span className="loader__text">Loading... </span>
-          </div>
-        ) : (
-          <div className="movies">
-            {movies.map((movie) => (
-              <Movie
-                key={movie.id}
-                id={movie.id}
-                year={movie.year}
-                title={movie.title}
-                summary={movie.summary}
-                poster={movie.medium_cover_image}
-                genres={movie.genres}
-              />
-            ))}
-          </div>
-        )}
-      </section>
-    );
-  }
+//Route는 만드시 Router 안에 위치해야 한다!
+//exact={true} 해줘야지 정확히 일치하는 path만 연결됨. 안해주면 포함된 path를 다 연결해줘서 우리가 의도하는 바와 맞지 않다.
+function App() {
+  return (
+    <HashRouter>
+      <Navigation />
+      <Route path="/" exact={true} component={Home} />
+      <Route path="/about" component={About} />
+      <Route path="/movie/:id" component={Detail} />
+    </HashRouter>
+  );
 }
 
 export default App;
